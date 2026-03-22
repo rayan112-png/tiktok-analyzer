@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Analyzer Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #fe2c55;
+            --secondary-color: #25f4ee;
+            --bg-dark: #080808; /* خلفية أغمق لتركيز العين على المحتوى والإعلانات */
+            --card-bg: rgba(255, 255, 255, 0.04);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-dark);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        #particles-js { position: fixed; width: 100%; height: 100%; z-index: -1; }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .nav-links a { color: #ccc; text-decoration: none; margin: 0 12px; font-size: 0.95rem; transition: 0.3s; }
+        .nav-links a:hover { color: var(--primary-color); }
+        
+        .lang-selector { display: flex; gap: 8px; }
+        .lang-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 4px 12px;
+            cursor: pointer;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            transition: 0.3s;
+        }
+        .lang-btn:hover { border-color: var(--secondary-color); }
+
+        /* Main Container */
+        .container { max-width: 800px; margin: 40px auto; text-align: center; padding: 0 20px; }
+
+        .glass-card {
+            background: var(--card-bg);
+            padding: 40px 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+        }
+
+        /* Ad Space Placeholder - مساحة مخصصة للإعلانات */
+        .ad-space {
+            margin: 20px auto;
+            width: 100%;
+            max-width: 728px;
+            height: 90px;
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #444;
+            font-size: 0.8rem;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 16px 20px;
+            border-radius: 50px;
+            border: 2px solid #222;
+            background: #000;
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            text-align: center;
+            transition: 0.3s;
+        }
+        input[type="text"]:focus { border-color: var(--primary-color); outline: none; }
+
+        .error-msg { color: var(--primary-color); font-size: 0.85rem; height: 20px; margin-bottom: 10px; visibility: hidden; }
+
+        .btn-analyze {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 45px;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 1rem;
+        }
+        .btn-analyze:hover { transform: scale(1.03); box-shadow: 0 0 25px rgba(254, 44, 85, 0.4); }
+
+        /* Result Styles */
+        #results { display: none; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .stat-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-box h4 { margin: 0; color: #888; font-size: 0.85rem; }
+        .stat-box p { font-size: 1.2rem; font-weight: bold; margin: 8px 0 0 0; color: var(--secondary-color); }
+        
+        .verdict { margin-top: 25px; font-size: 1.2rem; font-weight: bold; padding: 10px; border-radius: 10px; }
+
+        section { display: none; }
+        section.active { display: block; animation: fadeIn 0.4s ease-in-out; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        ul { text-align: right; line-height: 1.8; color: #ccc; }
+    </style>
+</head>
+<body>
+
+<div id="particles-js"></div>
+
+<nav>
+    <div class="nav-links">
+        <a href="#" onclick="showPage('home')" id="nav-home">الرئيسية</a>
+        <a href="#" onclick="showPage('users')" id="nav-users">المستخدمين</a>
+        <a href="#" onclick="showPage('how-to')" id="nav-how">كيفية الاستخدام</a>
+    </div>
+    <div class="lang-selector">
+        <button class="lang-btn" onclick="setLang('ar')">العربية</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" onclick="setLang('fr')">FR</button>
+    </div>
+</nav>
+
+<div class="ad-space">AD SPACE (728x90)</div>
+
+<section id="home" class="active">
+    <div class="container">
+        <div class="glass-card">
+            <h1 id="main-title">فاحص حسابات تيك توك الذكي</h1>
+            <p id="main-desc">أدخل اسم المستخدم لتحليل التفاعل وقوة الحساب</p>
+            
+            <input type="text" id="username" placeholder="username" oninput="validateInput(this)">
+            <div id="input-error" class="error-msg">الرجاء استخدام أحرف وأرقام إنجليزية فقط</div>
+            
+            <button class="btn-analyze" id="btn-text" onclick="startAnalysis()">ابدأ الفحص الآن</button>
+
+            <div id="results">
+                <div class="stats-grid">
+                    <div class="stat-box"><h4 id="res-fol">المتابعين</h4><p id="followers">0</p></div>
+                    <div class="stat-box"><h4 id="res-eng">التفاعل</h4><p id="engagement">0%</p></div>
+                    <div class="stat-box"><h4 id="res-view">المشاهدات</h4><p id="views">0</p></div>
+                </div>
+                <div class="verdict" id="decision">---</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="users">
+    <div class="container">
+        <div class="glass-card">
+            <h2 id="stats-title">إحصائيات المنصة</h2>
+            <p id="stats-desc">عدد المستخدمين اليوم: <strong>1,240</strong></p>
+        </div>
+    </div>
+</section>
+
+<section id="how-to">
+    <div class="container">
+        <div class="glass-card">
+            <h2 id="how-title">كيفية الاستخدام</h2>
+            <ul id="how-list">
+                <li>ضع اسم المستخدم بدون رمز @.</li>
+                <li>انتظر ثواني ليقوم النظام بالتحليل.</li>
+                <li>ستظهر النتيجة بناءً على التفاعل الحقيقي.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<div class="ad-space">AD SPACE (728x90)</div>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    particlesJS('particles-js', {
+        "particles": { "number": { "value": 40 }, "color": { "value": "#333" }, "line_linked": { "enable": true, "opacity": 0.1 }, "move": { "speed": 1 } }
+    });
+
+    const translations = {
+        ar: {
+            nav_home: "الرئيسية", nav_users: "المستخدمين", nav_how: "كيفية الاستخدام",
+            title: "فاحص حسابات تيك توك الذكي", desc: "أدخل اسم المستخدم لتحليل التفاعل وقوة الحساب",
+            btn: "ابدأ الفحص الآن", fol: "المتابعين", eng: "التفاعل", view: "المشاهدات",
+            err: "الرجاء استخدام أحرف وأرقام إنجليزية فقط", loading: "جاري التحليل...",
+            statT: "إحصائيات المنصة", statD: "عدد المستخدمين اليوم: 1,240",
+            howT: "كيفية الاستخدام", howL: "<li>ضع اسم المستخدم بدون رمز @.</li><li>انتظر ثواني ليقوم النظام بالتحليل.</li><li>ستظهر النتيجة بناءً على التفاعل الحقيقي.</li>",
+            good: "✅ الحساب مناسب للشراء", bad: "❌ التفاعل ضعيف جداً", dir: "rtl"
+        },
+        en: {
+            nav_home: "Home", nav_users: "Users", nav_how: "How to Use",
+            title: "TikTok Smart Analyzer", desc: "Enter username to analyze engagement and strength",
+            btn: "Start Analysis", fol: "Followers", eng: "Engagement", view: "Views",
+            err: "Please use English letters and numbers only", loading: "Analyzing...",
+            statT: "Platform Stats", statD: "Users today: 1,240",
+            howT: "How to Use", howL: "<li>Enter username without @.</li><li>Wait for the system to analyze.</li><li>Results appear based on engagement.</li>",
+            good: "✅ Account is good to buy", bad: "❌ Low engagement rate", dir: "ltr"
+        },
+        fr: {
+            nav_home: "Accueil", nav_users: "Utilisateurs", nav_how: "Comment utiliser",
+            title: "Analyseur TikTok Intelligent", desc: "Entrez le nom d'utilisateur pour analyser l'engagement",
+            btn: "Lancer l'analyse", fol: "Abonnés", eng: "Engagement", view: "Vues",
+            err: "Lettres anglaises et chiffres uniquement", loading: "Analyse...",
+            statT: "Statistiques", statD: "Utilisateurs aujourd'hui: 1 240",
+            howT: "Comment utiliser", howL: "<li>Entrez le nom sans @.</li><li>Attendez quelques secondes.</li><li>Les résultats s'affichent.</li>",
+            good: "✅ Bon compte à acheter", bad: "❌ Taux d'engagement faible", dir: "ltr"
+        }
+    };
+
+    let currentLang = 'ar';
+
+    function setLang(lang) {
+        currentLang = lang;
+        const t = translations[lang];
+        document.documentElement.dir = t.dir;
+        document.getElementById('nav-home').innerText = t.nav_home;
+        document.getElementById('nav-users').innerText = t.nav_users;
+        document.getElementById('nav-how').innerText = t.nav_how;
+        document.getElementById('main-title').innerText = t.title;
+        document.getElementById('main-desc').innerText = t.desc;
+        document.getElementById('btn-text').innerText = t.btn;
+        document.getElementById('res-fol').innerText = t.fol;
+        document.getElementById('res-eng').innerText = t.eng;
+        document.getElementById('res-view').innerText = t.view;
+        document.getElementById('input-error').innerText = t.err;
+        document.getElementById('stats-title').innerText = t.statT;
+        document.getElementById('stats-desc').innerHTML = t.statD;
+        document.getElementById('how-title').innerText = t.howT;
+        document.getElementById('how-list').innerHTML = t.howL;
+        
+        // تعديل محاذاة النص بناء على اللغة
+        document.getElementById('how-list').style.textAlign = (t.dir === 'rtl') ? 'right' : 'left';
+    }
+
+    function validateInput(input) {
+        const regex = /^[a-zA-Z0-9._]*$/;
+        const errorDiv = document.getElementById('input-error');
+        if (!regex.test(input.value)) {
+            errorDiv.style.visibility = 'visible';
+            input.value = input.value.replace(/[^a-zA-Z0-9._]/g, '');
+        } else {
+            errorDiv.style.visibility = 'hidden';
+        }
+    }
+
+    function showPage(id) {
+        document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+async function startAnalysis() {
+    const user = document.getElementById('username').value;
+    
+    // التحقق من وجود اسم مستخدم
+    if(!user) {
+        alert(currentLang === 'ar' ? "يرجى إدخال اسم المستخدم" : "Please enter username");
+        return;
+    }
+
+    const btn = document.getElementById('btn-text');
+    const resDiv = document.getElementById('results');
+    
+    // تغيير حالة الزر إلى "جاري التحليل"
+    btn.innerText = translations[currentLang].loading;
+    btn.disabled = true; // تعطيل الزر مؤقتاً لمنع الضغط المتكرر
+    resDiv.style.display = 'none';
+
+    try {
+        // الاتصال بسيرفر البايثون (Backend)
+        const response = await fetch('http://127.0.0.1:5000/analyze', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: user})
+        });
+        
+        const data = await response.json();
+
+        // إظهار النتائج الحقيقية القادمة من البايثون
+        resDiv.style.display = 'block';
+        document.getElementById('followers').innerText = data.followers.toLocaleString();
+        document.getElementById('engagement').innerText = data.engagement;
+        document.getElementById('views').innerText = data.views.toLocaleString();
+
+        const decision = document.getElementById('decision');
+        if(data.raw_engagement > 4) {
+            decision.innerText = translations[currentLang].good;
+            decision.style.color = "#25f4ee";
+            decision.style.background = "rgba(37, 244, 238, 0.1)";
+        } else {
+            decision.innerText = translations[currentLang].bad;
+            decision.style.color = "#fe2c55";
+            decision.style.background = "rgba(254, 44, 85, 0.1)";
+        }
+
+    } catch (error) {
+        console.error("Error:", error);
+        // رسالة تنبيه إذا كان ملف app.py غير مشتغل
+        alert(currentLang === 'ar' ? "خطأ: تأكد من تشغيل ملف بايثون (app.py) أولاً" : "Error: Make sure app.py is running");
+    } finally {
+        // إعادة الزر لحالته الطبيعية
+        btn.innerText = translations[currentLang].btn;
+        btn.disabled = false;
+    }
+}
+  
+</script>
+</body>
+</html>
