@@ -9,7 +9,7 @@
         :root {
             --primary-color: #fe2c55;
             --secondary-color: #25f4ee;
-            --bg-dark: #080808; /* خلفية أغمق لتركيز العين على المحتوى والإعلانات */
+            --bg-dark: #080808;
             --card-bg: rgba(255, 255, 255, 0.04);
         }
 
@@ -24,7 +24,6 @@
 
         #particles-js { position: fixed; width: 100%; height: 100%; z-index: -1; }
 
-        /* Navigation */
         nav {
             display: flex;
             justify-content: space-between;
@@ -54,7 +53,6 @@
         }
         .lang-btn:hover { border-color: var(--secondary-color); }
 
-        /* Main Container */
         .container { max-width: 800px; margin: 40px auto; text-align: center; padding: 0 20px; }
 
         .glass-card {
@@ -65,7 +63,6 @@
             backdrop-filter: blur(15px);
         }
 
-        /* Ad Space Placeholder - مساحة مخصصة للإعلانات */
         .ad-space {
             margin: 20px auto;
             width: 100%;
@@ -109,7 +106,6 @@
         }
         .btn-analyze:hover { transform: scale(1.03); box-shadow: 0 0 25px rgba(254, 44, 85, 0.4); }
 
-        /* Result Styles */
         #results { display: none; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; }
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .stat-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
@@ -248,8 +244,6 @@
         document.getElementById('stats-desc').innerHTML = t.statD;
         document.getElementById('how-title').innerText = t.howT;
         document.getElementById('how-list').innerHTML = t.howL;
-        
-        // تعديل محاذاة النص بناء على اللغة
         document.getElementById('how-list').style.textAlign = (t.dir === 'rtl') ? 'right' : 'left';
     }
 
@@ -268,10 +262,9 @@
         document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
+
 async function startAnalysis() {
-    const user = document.getElementById('username').value;
-    
-    // التحقق من وجود اسم مستخدم
+    const user = document.getElementById('username').value.trim();
     if(!user) {
         alert(currentLang === 'ar' ? "يرجى إدخال اسم المستخدم" : "Please enter username");
         return;
@@ -280,25 +273,26 @@ async function startAnalysis() {
     const btn = document.getElementById('btn-text');
     const resDiv = document.getElementById('results');
     
-    // تغيير حالة الزر إلى "جاري التحليل"
     btn.innerText = translations[currentLang].loading;
-    btn.disabled = true; // تعطيل الزر مؤقتاً لمنع الضغط المتكرر
+    btn.disabled = true;
     resDiv.style.display = 'none';
 
     try {
-        // الاتصال بسيرفر البايثون (Backend)
-   const response = await fetch(window.location.origin + '/analyze', {
+        // الإصلاح الجوهري هنا: إضافة method: 'POST'
+        const response = await fetch('/analyze', {
+            method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({username: user})
         });
         
+        if (!response.ok) throw new Error("Server Error");
+
         const data = await response.json();
 
-        // إظهار النتائج الحقيقية القادمة من البايثون
         resDiv.style.display = 'block';
-        document.getElementById('followers').innerText = data.followers.toLocaleString();
-        document.getElementById('engagement').innerText = data.engagement;
-        document.getElementById('views').innerText = data.views.toLocaleString();
+        document.getElementById('followers').innerText = (data.followers || 0).toLocaleString();
+        document.getElementById('engagement').innerText = data.engagement || "0%";
+        document.getElementById('views').innerText = (data.views || 0).toLocaleString();
 
         const decision = document.getElementById('decision');
         if(data.raw_engagement > 4) {
@@ -313,15 +307,12 @@ async function startAnalysis() {
 
     } catch (error) {
         console.error("Error:", error);
-        // رسالة تنبيه إذا كان ملف app.py غير مشتغل
-        alert(currentLang === 'ar' ? "خطأ: تأكد من تشغيل ملف بايثون (app.py) أولاً" : "Error: Make sure app.py is running");
+        alert(currentLang === 'ar' ? "فشل الاتصال بالسيرفر. تأكد من عمل Render بشكل صحيح." : "Connection failed. Check Render status.");
     } finally {
-        // إعادة الزر لحالته الطبيعية
         btn.innerText = translations[currentLang].btn;
         btn.disabled = false;
     }
 }
-  
 </script>
 </body>
 </html>
