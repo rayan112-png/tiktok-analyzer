@@ -287,8 +287,7 @@ async function startAnalysis() {
 
     try {
         // الاتصال بسيرفر البايثون (Backend)
-        const response = await fetch('/analyze', {
-            method: 'POST',
+   const response = await fetch(window.location.origin + '/analyze', {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({username: user})
         });
